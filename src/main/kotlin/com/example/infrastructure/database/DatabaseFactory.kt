@@ -1,7 +1,7 @@
 package com.example.infrastructure.database
 
-import com.example.Cities
-import com.example.Users
+import com.example.domain.model.user.User
+import com.example.domain.model.user.Users
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
@@ -11,41 +11,35 @@ import org.slf4j.LoggerFactory
 object DatabaseFactory {
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    fun connect() {
-        log.info("Connecting to database")
-        Database.connect("jdbc:postgresql://localhost/", user = "michal.najborowski")
-    }
+    fun connect(): Database =
+        log.info("Connecting to database").let {
+            Database.connect("jdbc:postgresql://localhost/postgres", user = "michal.najborowski")
+        }
+
 
     fun init() {
         transaction {
             log.info("Initialising database")
-            SchemaUtils.createMissingTablesAndColumns(Cities, Users)
+            SchemaUtils.createMissingTablesAndColumns(
+                Users
+            )
 
-            val saintPetersburgId = Cities.insert {
-                it[name] = "St. Petersburg"
-            } get Cities.id
-
-            val munichId = Cities.insert {
-                it[name] = "Munich"
-            } get Cities.id
-
-
-            Users.insert {
-                it[name] = "Andrey"
-                it[cityId] = saintPetersburgId
+            User.new {
+                age = 10
+                nickname = "Jeff"
             }
 
-            Users.insert {
-                it[name] = "Sergey"
-                it[cityId] = munichId
+            User.new {
+                age = 18
+                nickname = "Pacman"
             }
         }
     }
 
-    fun dropAndInit() {
+    fun dropAndInit(database: Database) {
         transaction {
             log.info("Dropping all tables")
-            SchemaUtils.drop(Users, Cities)
+            SchemaUtils.drop(Users)
         }
         init()
     }

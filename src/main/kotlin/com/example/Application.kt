@@ -1,5 +1,8 @@
 package com.example
 
+import com.example.domain.model.user.User
+import com.example.domain.model.user.dto.UserDTO
+import com.example.domain.model.user.dto.updateWith
 import com.example.infrastructure.database.DatabaseFactory
 import com.example.plugins.configureRouting
 import com.example.plugins.configureSecurity
@@ -8,15 +11,7 @@ import com.example.plugins.configureSockets
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import org.jetbrains.exposed.dao.id.IntIdTable
-
-object Users : IntIdTable("user") {
-    val name = varchar("name", length = 50) // Column<String>
-    val cityId = reference("city_id", Cities)
-}
-
-object Cities : IntIdTable("city") {
-    val name = varchar("name", 50) // Column<String>
-}
+import org.jetbrains.exposed.sql.transactions.transaction
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
@@ -25,7 +20,11 @@ fun main() {
         configureSerialization()
         configureSockets()
 
-        DatabaseFactory.connect()
-        DatabaseFactory.dropAndInit()
+        DatabaseFactory.connect().let(DatabaseFactory::dropAndInit)
+        transaction {
+            val user1 = User[1]
+            val user2 = UserDTO(user1).copy(age = 18, nickname = "Guy")
+            user1.updateWith(user2)
+        }
     }.start(wait = true)
 }
