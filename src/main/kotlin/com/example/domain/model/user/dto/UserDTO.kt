@@ -1,18 +1,20 @@
 package com.example.domain.model.user.dto
 
 import com.example.domain.model.user.User
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class UserDTO(
-    val id: Int,
+    val id: Int? = null,
     val age: Int,
     val nickname: String
-) {
-    constructor(user: User) : this(
-        id = user.id.value,
-        age = user.age,
-        nickname = user.nickname
-    )
-}
+)
+
+fun User.toUserDTO() = UserDTO(
+    id = id.value,
+    age = age,
+    nickname = nickname
+)
 
 fun User.updateWith(other: UserDTO) {
     age = other.age

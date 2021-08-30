@@ -1,9 +1,11 @@
 package com.example
 
 import com.example.domain.model.user.User
+import com.example.domain.model.user.UserService
 import com.example.domain.model.user.dto.UserDTO
 import com.example.domain.model.user.dto.updateWith
 import com.example.infrastructure.database.DatabaseFactory
+import com.example.plugins.configureLogging
 import com.example.plugins.configureRouting
 import com.example.plugins.configureSecurity
 import com.example.plugins.configureSerialization
@@ -16,15 +18,12 @@ import org.jetbrains.exposed.sql.transactions.transaction
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         configureRouting()
-        configureSecurity()
+//        configureSecurity()
         configureSerialization()
-        configureSockets()
+//        configureSockets()
+        configureLogging()
 
-        DatabaseFactory.connect().let(DatabaseFactory::dropAndInit)
-        transaction {
-            val user1 = User[1]
-            val user2 = UserDTO(user1).copy(age = 18, nickname = "Guy")
-            user1.updateWith(user2)
-        }
+        DatabaseFactory.connect()
+        DatabaseFactory.dropAndInit()
     }.start(wait = true)
 }

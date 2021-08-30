@@ -1,15 +1,15 @@
 package com.example.infrastructure.database
 
-import com.example.domain.model.user.User
+import com.example.domain.model.user.UserService
 import com.example.domain.model.user.Users
+import com.example.domain.model.user.dto.UserDTO
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.slf4j.LoggerFactory
+import org.slf4j.LoggerFactory.getLogger
 
 object DatabaseFactory {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = getLogger(javaClass)
 
     fun connect(): Database =
         log.info("Connecting to database").let {
@@ -24,19 +24,14 @@ object DatabaseFactory {
                 Users
             )
 
-            User.new {
-                age = 10
-                nickname = "Jeff"
-            }
-
-            User.new {
-                age = 18
-                nickname = "Pacman"
-            }
+            val service = UserService()
+            service.create(UserDTO(null, 18, "Michu"))
+            service.update(UserDTO(1, 24, "Najbo"))
+//            service.delete(1)
         }
     }
 
-    fun dropAndInit(database: Database) {
+    fun dropAndInit() {
         transaction {
             log.info("Dropping all tables")
             SchemaUtils.drop(Users)
