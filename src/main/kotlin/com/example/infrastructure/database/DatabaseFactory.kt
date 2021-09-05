@@ -1,6 +1,6 @@
 package com.example.infrastructure.database
 
-import com.example.domain.model.user.UserService
+import com.example.domain.model.user.UserServiceImpl
 import com.example.domain.model.user.Users
 import com.example.domain.model.user.dto.UserDTO
 import org.jetbrains.exposed.sql.Database
@@ -24,8 +24,8 @@ object DatabaseFactory {
                 Users
             )
 
-            val service = UserService()
-            service.create(UserDTO(null, "Apsiałek", "apsialek@test.pl"))
+            val service = UserServiceImpl()
+            service.create(UserDTO(1, "Apsiałek", "apsialek@test.pl"))
             service.update(UserDTO(1, "Pienta", "pienta@test.pl"))
 //            service.delete(1)
         }
