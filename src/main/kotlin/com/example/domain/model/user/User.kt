@@ -15,5 +15,5 @@ class User(
 ) : IntEntity(id) {
     companion object : IntEntityClass<User>(Users)
     var nickname by Users.nickname
-    var email by Users.nickname
+    var email by Users.email
 }
