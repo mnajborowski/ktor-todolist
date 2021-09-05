@@ -6,14 +6,14 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 
 object Users : IntIdTable("user") {
-    val age = integer("age")
     val nickname = text("nickname")
+    val email = text("email")
 }
 
 class User(
     id: EntityID<Int>,
 ) : IntEntity(id) {
     companion object : IntEntityClass<User>(Users)
-    var age by Users.age
     var nickname by Users.nickname
+    var email by Users.nickname
 }

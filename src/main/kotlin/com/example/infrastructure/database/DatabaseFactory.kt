@@ -25,8 +25,8 @@ object DatabaseFactory {
             )
 
             val service = UserService()
-            service.create(UserDTO(null, 18, "Michu"))
-            service.update(UserDTO(1, 24, "Najbo"))
+            service.create(UserDTO(null, "Apsiałek", "apsialek@test.pl"))
+            service.update(UserDTO(1, "Pienta", "pienta@test.pl"))
 //            service.delete(1)
         }
     }

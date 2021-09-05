@@ -9,8 +9,8 @@ class UserService {
     fun findById(id: Int): User? = transaction { User.findById(id) }
     fun create(userDTO: UserDTO): User = transaction {
         User.new {
-            age = userDTO.age
             nickname = userDTO.nickname
+            email = userDTO.email
         }
     }
     fun update(userDTO: UserDTO) = transaction {

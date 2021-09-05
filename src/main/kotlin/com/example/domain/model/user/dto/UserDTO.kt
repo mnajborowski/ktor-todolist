@@ -6,17 +6,17 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserDTO(
     val id: Int? = null,
-    val age: Int,
-    val nickname: String
+    val nickname: String,
+    val email: String
 )
 
 fun User.toUserDTO() = UserDTO(
     id = id.value,
-    age = age,
-    nickname = nickname
+    nickname = nickname,
+    email = email
 )
 
 fun User.updateWith(other: UserDTO) {
-    age = other.age
     nickname = other.nickname
+    email = other.email
 }
