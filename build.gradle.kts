@@ -6,7 +6,7 @@ val postgresql_version: String by project
 val hikari_version: String by project
 
 val exposed_version: String by project
-val kodein_version: String by project
+val koin_version: String by project
 
 plugins {
     application
@@ -40,7 +40,9 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
-    implementation("org.kodein.di:kodein-di:$kodein_version")
+    implementation("io.insert-koin:koin-ktor:$koin_version")
+    implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlin_version")
+    testImplementation("io.insert-koin:koin-test:$koin_version")
 }
