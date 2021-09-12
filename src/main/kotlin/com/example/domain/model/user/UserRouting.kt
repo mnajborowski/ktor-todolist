@@ -7,9 +7,10 @@ import io.ktor.locations.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import org.koin.ktor.ext.inject
 
 fun Application.configureUserRouting() {
-    val service = UserServiceImpl()
+    val service: UserService by inject()
     routing {
         route("/user") {
             getUserById(service)
@@ -19,7 +20,7 @@ fun Application.configureUserRouting() {
 }
 
 @OptIn(KtorExperimentalLocationsAPI::class)
-fun Route.getUserById(service: UserServiceImpl) {
+fun Route.getUserById(service: UserService) {
     get<UserParameters> { userParameters ->
         service.getById(userParameters.id).let {
             call.respond(it.toUserDTO())
@@ -27,7 +28,7 @@ fun Route.getUserById(service: UserServiceImpl) {
     }
 }
 
-fun Route.createUser(service: UserServiceImpl) {
+fun Route.createUser(service: UserService) {
     post {
         call.receive<UserDTO>()
             .let(service::create)
