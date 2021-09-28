@@ -18,6 +18,6 @@ fun main() {
         configureLogging()
 
         DatabaseFactory.connect()
-        DatabaseFactory.dropAndInit()
+//        DatabaseFactory.dropAndInit()
     }.start(wait = true)
 }

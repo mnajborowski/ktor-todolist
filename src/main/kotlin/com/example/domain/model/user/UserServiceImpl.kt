@@ -14,8 +14,8 @@ class UserServiceImpl : UserService {
         }
     }
 
-    override fun update(userDTO: UserDTO) = transaction {
-        getById(userDTO.id!!).updateWith(userDTO)
+    override fun update(userDTO: UserDTO): User = transaction {
+        getById(userDTO.id!!).apply { updateWith(userDTO) }
     }
 
     override fun delete(id: Int) = transaction {

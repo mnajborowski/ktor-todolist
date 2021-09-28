@@ -19,9 +19,9 @@ class UserServiceMock : UserService {
             users[it.id.value] = it
         }
 
-    override fun update(userDTO: UserDTO) {
-        users[userDTO.id!!] = getById(userDTO.id).apply { updateWith(userDTO) }
-    }
+    override fun update(userDTO: UserDTO) =
+        users[userDTO.id!!]!!.apply { updateWith(userDTO) }
+
 
     override fun delete(id: Int) {
         users.remove(id)

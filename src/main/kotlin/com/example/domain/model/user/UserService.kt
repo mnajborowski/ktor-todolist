@@ -6,6 +6,6 @@ interface UserService {
     fun getById(id: Int): User
     fun findById(id: Int): User?
     fun create(userDTO: UserDTO): User
-    fun update(userDTO: UserDTO)
+    fun update(userDTO: UserDTO): User
     fun delete(id: Int)
 }
