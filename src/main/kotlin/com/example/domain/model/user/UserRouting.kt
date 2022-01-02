@@ -3,6 +3,7 @@ package com.example.domain.model.user
 import com.example.domain.model.user.dto.UserDTO
 import com.example.domain.model.user.dto.toUserDTO
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.locations.*
 import io.ktor.request.*
@@ -25,18 +26,22 @@ fun Application.configureUserRouting() {
 
 @KtorExperimentalLocationsAPI
 fun Route.getUserById(service: UserService) {
-    get<UserParameters> { userParameters ->
-        service.getById(userParameters.id).let {
-            call.respond(it.toUserDTO())
+    authenticate("auth-session-read") {
+        get<UserParameters> { userParameters ->
+            service.getById(userParameters.id).let {
+                call.respond(it.toUserDTO())
+            }
         }
     }
 }
 
 fun Route.createUser(service: UserService) {
-    post {
-        call.receive<UserDTO>()
-            .let(service::create)
-            .let { call.respond(it.toUserDTO()) }
+    authenticate("auth-session-write") {
+        post {
+            call.receive<UserDTO>()
+                .let(service::create)
+                .let { call.respond(it.toUserDTO()) }
+        }
     }
 }
 
