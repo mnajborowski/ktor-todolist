@@ -1,7 +1,7 @@
 val ktor_version = "1.6.7"
 val kotlin_version = "1.5.21"
-val logback_version = "1.2.9"
-val kotest_version = "4.6.3"
+val logback_version = "1.2.10"
+val kotest_version = "5.0.2"
 val kotest_koin_version = "1.1.0"
 val kotest_assertions_version = "1.0.3"
 
@@ -51,9 +51,8 @@ dependencies {
     implementation("io.insert-koin:koin-ktor:$koin_version")
     implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
     testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlin_version")
     testImplementation("io.insert-koin:koin-test:$koin_version")
-//    testImplementation("io.kotest:kotest-runner-junit5:$kotest_version")
+    testImplementation("io.kotest:kotest-runner-junit5:$kotest_version")
     testImplementation("io.kotest.extensions:kotest-extensions-koin:$kotest_koin_version")
     testImplementation("io.kotest.extensions:kotest-assertions-ktor:$kotest_assertions_version")
 }
