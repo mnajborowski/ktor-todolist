@@ -1,0 +1,33 @@
+{
+	"id": "24686638-6d25-496c-8d84-a274b42d8eeb",
+	"values": [
+		{
+			"key": "email",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "nickname",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "cityId",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"name": "Globals",
+	"_postman_variable_scope": "globals",
+	"_postman_exported_at": "2022-04-10T23:27:15.958Z",
+	"_postman_exported_using": "Postman/9.15.10"
+}
