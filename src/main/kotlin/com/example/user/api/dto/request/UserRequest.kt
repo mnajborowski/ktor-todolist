@@ -10,11 +10,13 @@ data class UserRequest(
     val nickname: String,
     val email: String,
     val cityId: Int,
+    val password: String? = null
 ) {
     fun toCreateUserCommand(): CreateUser = CreateUser(
         nickname = nickname,
         email = email,
-        cityId = cityId
+        cityId = cityId,
+        password = password!!
     )
 
     fun toUpdateUserCommand(id: UserId): UpdateUser = UpdateUser(
