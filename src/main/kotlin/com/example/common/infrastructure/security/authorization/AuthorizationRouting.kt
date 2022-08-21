@@ -12,7 +12,7 @@ import io.ktor.sessions.*
 fun Application.configureAuthorizationRouting() {
     routing {
         authenticate("auth-form") {
-            post("/login") {
+            get("/login") {
                 val userName = call.principal<UserIdPrincipal>()?.name.toString()
                 call.sessions.set(UserSession(name = userName, roles = setOf(READ, WRITE)))
                 call.respondRedirect("/hello")
