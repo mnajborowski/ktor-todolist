@@ -1,13 +1,19 @@
 package com.example.common.infrastructure.database
 
+import com.example.common.infrastructure.security.authorization.DigestConfiguration
 import com.example.user.infrastructure.entity.Cities
 import com.example.user.infrastructure.entity.CityEntity
 import com.example.user.infrastructure.entity.UserEntity
 import com.example.user.infrastructure.entity.Users
 import org.jetbrains.exposed.dao.load
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory.getLogger
+import kotlin.random.Random
 
 object DatabaseFactory {
     private val log = getLogger(javaClass)
@@ -26,19 +32,22 @@ object DatabaseFactory {
                 it[name] = "Poznań"
             }
 
+            val salt = Random.nextBytes(32)
             Users.insert {
-                it[nickname] = "mnajborowski"
-                it[email] = "test@test.pl"
+                it[username] = "mnajborowski"
+                it[email] = "mnajborowski@test.pl"
                 it[city] = cityId
+                it[passwordHash] = DigestConfiguration.md5("mnajborowski:/:maslo123")
+                it[this.salt] = salt
             }
 
-            Users.update({ Users.id eq 1 }) { it[nickname] = "michal.najborowski" }
+//            Users.update({ Users.id eq 1 }) { it[username] = "michal.najborowski" }
 
             (Users innerJoin Cities)
-                .slice(Users.nickname, Cities.name)
-                .select { Users.nickname like "michal%" }
+                .slice(Users.username, Cities.name)
+                .select { Users.username like "michal%" }
                 .forEach {
-                    println("${it[Users.nickname]} lives in ${it[Cities.name]}")
+                    println("${it[Users.username]} lives in ${it[Cities.name]}")
                 }
 
             val wroclaw = CityEntity.new {
@@ -46,9 +55,11 @@ object DatabaseFactory {
             }
 
             UserEntity.new {
-                nickname = "michaelo.angelo"
-                email = "michaelo.angelo@test.pl"
+                username = "michal.najborowski"
+                email = "michal.najborowski@test.pl"
                 city = wroclaw
+                passwordHash = DigestConfiguration.sha256("maslo123", salt)
+                this.salt = salt
             }
 
             UserEntity[2].city = CityEntity.find { Cities.name eq "Poznań" }.single()
