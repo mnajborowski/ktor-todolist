@@ -37,7 +37,7 @@ object DatabaseFactory {
                 it[username] = "mnajborowski"
                 it[email] = "mnajborowski@test.pl"
                 it[city] = cityId
-                it[passwordHash] = DigestConfiguration.md5("mnajborowski:/:maslo123")
+                it[passwordHash] = DigestConfiguration.md5("mnajborowski:/:test")
                 it[this.salt] = salt
             }
 
@@ -58,7 +58,7 @@ object DatabaseFactory {
                 username = "michal.najborowski"
                 email = "michal.najborowski@test.pl"
                 city = wroclaw
-                passwordHash = DigestConfiguration.sha256("maslo123", salt)
+                passwordHash = DigestConfiguration.sha256("test", salt)
                 this.salt = salt
             }
 

@@ -19,7 +19,7 @@ fun Application.configureSecurity() {
             validate { credentials ->
                 if (
                     credentials.name == "mnajborowski" &&
-                    credentials.password == "maslo123"
+                    credentials.password == "test"
                 ) {
                     UserIdPrincipal(credentials.name)
                 } else {
@@ -33,7 +33,7 @@ fun Application.configureSecurity() {
                 val digestFunction = DigestConfiguration.digestFunctionStatic
                 val hashedUserTable = UserHashedTableAuth(
                     table = mapOf(
-                        "mnajborowski" to digestFunction("maslo123")
+                        "mnajborowski" to digestFunction("test")
                     ),
                     digester = digestFunction
                 )
@@ -46,7 +46,9 @@ fun Application.configureSecurity() {
                 val user = userService.getUser(credentials.name)
                 if (
                     credentials.name == user.username &&
-                    DigestConfiguration.sha256(credentials.password, user.salt).contentEquals(user.passwordHash)
+                    DigestConfiguration
+                        .sha256(credentials.password, user.salt)
+                        .contentEquals(user.passwordHash)
                 ) {
                     UserIdPrincipal(credentials.name)
                 } else {
@@ -66,7 +68,7 @@ fun Application.configureSecurity() {
             userParamName = "username"
             passwordParamName = "password"
             validate { credentials ->
-                if (credentials.name == "mnajborowski" && credentials.password == "maslo123") {
+                if (credentials.name == "mnajborowski" && credentials.password == "test") {
                     UserIdPrincipal(credentials.name)
                 } else {
                     null
