@@ -68,7 +68,9 @@ fun Application.configureSecurity() {
             userParamName = "username"
             passwordParamName = "password"
             validate { credentials ->
-                if (credentials.name == "mnajborowski" && credentials.password == "test") {
+                if (credentials.name == "mnajborowski"
+                    && credentials.password == "test"
+                ) {
                     UserIdPrincipal(credentials.name)
                 } else {
                     null

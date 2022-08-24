@@ -12,17 +12,25 @@ import io.ktor.sessions.*
 import kotlinx.html.body
 import kotlinx.html.br
 import kotlinx.html.button
-import kotlinx.html.getForm
 import kotlinx.html.label
 import kotlinx.html.passwordInput
+import kotlinx.html.postForm
 import kotlinx.html.textInput
 
 fun Application.configureAuthorizationRouting() {
     routing {
+        authenticate("auth-basic") {
+            get("/login") {
+                val userName = call.principal<UserIdPrincipal>()?.name.toString()
+                call.sessions.set(UserSession(name = userName, roles = setOf(READ, WRITE)))
+                call.respondRedirect("/hello")
+            }
+        }
+
         get("/login-form") {
             call.respondHtml {
                 body {
-                    getForm("/login") {
+                    postForm("/login") {
                         label { text("Username") }
                         br
                         textInput(name = "username")
@@ -39,7 +47,7 @@ fun Application.configureAuthorizationRouting() {
         }
 
         authenticate("auth-form") {
-            get("/login") {
+            post("/login") {
                 val userName = call.principal<UserIdPrincipal>()?.name.toString()
                 call.sessions.set(UserSession(name = userName, roles = setOf(READ, WRITE)))
                 call.respondRedirect("/hello")
