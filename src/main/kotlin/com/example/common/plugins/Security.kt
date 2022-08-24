@@ -1,5 +1,7 @@
 package com.example.common.plugins
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import com.example.common.infrastructure.security.authorization.DigestConfiguration
 import com.example.common.infrastructure.security.principal.Role.READ
 import com.example.common.infrastructure.security.principal.Role.WRITE
@@ -7,6 +9,8 @@ import com.example.common.infrastructure.security.principal.UserSession
 import com.example.user.domain.service.UserService
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.auth.jwt.*
+import io.ktor.auth.ldap.*
 import io.ktor.http.*
 import io.ktor.response.*
 import org.koin.ktor.ext.inject
@@ -72,6 +76,32 @@ fun Application.configureSecurity() {
                     && credentials.password == "test"
                 ) {
                     UserIdPrincipal(credentials.name)
+                } else {
+                    null
+                }
+            }
+        }
+
+        basic("auth-ldap") {
+            validate { credentials ->
+                ldapAuthenticate(
+                    credentials,
+                    "ldap://localhost:10389",
+                    "cn=${credentials.name},ou=Users,dc=example,dc=com"
+                )
+            }
+        }
+
+        jwt("auth-jwt") {
+            realm = "/"
+            verifier(JWT
+                .require(Algorithm.HMAC256("secret"))
+                .withAudience("http://0.0.0.0:8080/hello")
+                .withIssuer("http://0.0.0.0:8080/")
+                .build())
+            validate { credential ->
+                if (credential.payload.getClaim("username").asString() != "") {
+                    JWTPrincipal(credential.payload)
                 } else {
                     null
                 }
