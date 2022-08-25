@@ -100,7 +100,8 @@ fun Application.configureSecurity() {
                 .withIssuer("http://0.0.0.0:8080/")
                 .build())
             validate { credential ->
-                if (credential.payload.getClaim("username").asString() != "") {
+                val username = credential.payload.getClaim("username").asString()
+                if (userService.findUser(username) != null) {
                     JWTPrincipal(credential.payload)
                 } else {
                     null

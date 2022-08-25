@@ -9,6 +9,7 @@ interface UserService {
     fun getUser(id: UserId): User
     fun getUser(username: String): User
     fun findUser(id: UserId): User?
+    fun findUser(username: String): User?
     fun createUser(command: CreateUser): User
     fun updateUser(command: UpdateUser): User
     fun deleteUser(id: UserId)

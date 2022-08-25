@@ -18,6 +18,7 @@ class UserServiceImpl(
     override fun getUser(username: String): User = userRepository.getByUsername(username)
 
     override fun findUser(id: UserId): User? = userRepository.findById(id)
+    override fun findUser(username: String): User? = userRepository.findByUsername(username)
 
     override fun createUser(command: CreateUser): User {
         val salt = Random.nextBytes(32)

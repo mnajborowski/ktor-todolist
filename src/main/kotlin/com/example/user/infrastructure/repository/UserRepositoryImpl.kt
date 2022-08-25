@@ -9,8 +9,13 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class UserRepositoryImpl : UserRepository {
     override fun getById(id: Int): User = transaction { UserEntity[id].toDomain() }
-    override fun getByUsername(username: String): User = transaction { UserEntity.find { Users.username eq username }.single().toDomain() }
+    override fun getByUsername(username: String): User =
+        transaction { UserEntity.find { Users.username eq username }.single().toDomain() }
+
     override fun findById(id: Int): User? = transaction { UserEntity.findById(id)?.toDomain() }
+    override fun findByUsername(username: String): User? =
+        transaction { UserEntity.find { Users.username eq username }.firstOrNull()?.toDomain() }
+
     override fun create(user: User): User = transaction {
         UserEntity.new {
             email = user.email
