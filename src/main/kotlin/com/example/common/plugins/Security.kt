@@ -3,6 +3,7 @@ package com.example.common.plugins
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.example.common.infrastructure.security.authorization.DigestConfiguration
+import com.example.common.infrastructure.security.authorization.UserInfo
 import com.example.common.infrastructure.security.principal.Role.READ
 import com.example.common.infrastructure.security.principal.Role.WRITE
 import com.example.common.infrastructure.security.principal.UserSession
@@ -11,12 +12,22 @@ import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
 import io.ktor.auth.ldap.*
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.features.json.*
+import io.ktor.client.features.json.serializer.*
+import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.response.*
 import org.koin.ktor.ext.inject
 
 fun Application.configureSecurity() {
     val userService: UserService by inject()
+    val httpClient = HttpClient(CIO) {
+        install(JsonFeature) {
+            serializer = KotlinxSerializer()
+        }
+    }
 
     install(Authentication) {
         basic("auth-basic") {
@@ -106,6 +117,41 @@ fun Application.configureSecurity() {
                 } else {
                     null
                 }
+            }
+        }
+
+        oauth("auth-oauth-google") {
+            urlProvider = { "http://localhost:8080/callback" }
+            providerLookup = {
+                OAuthServerSettings.OAuth2ServerSettings(
+                    name = "google",
+                    authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
+                    accessTokenUrl = "https://accounts.google.com/o/oauth2/token",
+                    requestMethod = HttpMethod.Post,
+                    clientId = System.getenv("GOOGLE_CLIENT_ID"),
+                    clientSecret = System.getenv("GOOGLE_CLIENT_SECRET"),
+                    defaultScopes = listOf("profile")
+                )
+            }
+            client = httpClient
+        }
+
+        session<UserSession>("auth-session-oauth") {
+            validate { session: UserSession ->
+                if (session.name != "null") {
+                    val userInfo: UserInfo = httpClient.get("https://www.googleapis.com/oauth2/v2/userinfo") {
+                        headers {
+                            append(HttpHeaders.Authorization, "Bearer ${session.name}")
+                        }
+                    }
+                    log.info("User ${userInfo.name} logged in by existing session")
+                    session
+                } else {
+                    null
+                }
+            }
+            challenge {
+                call.respondText(status = HttpStatusCode.Unauthorized) { "You don't have permission to this resource." }
             }
         }
 

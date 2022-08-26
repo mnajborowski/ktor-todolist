@@ -70,7 +70,17 @@ fun Application.configureAuthorizationRouting() {
             }
         }
 
-        authenticate("auth-jwt") {
+        authenticate("auth-oauth-google") {
+            get("/login-oauth") {}
+        }
+
+        get("/callback") {
+            val principal = call.principal<OAuthAccessTokenResponse.OAuth2>()
+            call.sessions.set(UserSession(name = principal?.accessToken.toString(), roles = setOf(READ, WRITE)))
+            call.respondRedirect("/hello")
+        }
+
+        authenticate("auth-session-oauth") {
             get("/hello") {
                 call.respondText { "Hello! You've logged in." }
             }
