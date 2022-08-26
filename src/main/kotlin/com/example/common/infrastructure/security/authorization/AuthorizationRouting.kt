@@ -70,7 +70,7 @@ fun Application.configureAuthorizationRouting() {
             }
         }
 
-        authenticate("auth-oauth-github") {
+        authenticate("auth-oauth-google") {
             get("/login-oauth") {}
         }
 
