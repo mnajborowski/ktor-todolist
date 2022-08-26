@@ -120,17 +120,16 @@ fun Application.configureSecurity() {
             }
         }
 
-        oauth("auth-oauth-google") {
+        oauth("auth-oauth-github") {
             urlProvider = { "http://localhost:8080/callback" }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
-                    name = "google",
-                    authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
-                    accessTokenUrl = "https://accounts.google.com/o/oauth2/token",
+                    name = "github",
+                    authorizeUrl = "https://github.com/login/oauth/authorize",
+                    accessTokenUrl = "https://github.com/login/oauth/access_token",
                     requestMethod = HttpMethod.Post,
-                    clientId = System.getenv("GOOGLE_CLIENT_ID"),
-                    clientSecret = System.getenv("GOOGLE_CLIENT_SECRET"),
-                    defaultScopes = listOf("profile")
+                    clientId = System.getenv("GITHUB_CLIENT_ID"),
+                    clientSecret = System.getenv("GITHUB_CLIENT_SECRET"),
                 )
             }
             client = httpClient
