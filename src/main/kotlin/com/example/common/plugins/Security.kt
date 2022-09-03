@@ -16,6 +16,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
+import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.response.*
@@ -24,8 +25,15 @@ import org.koin.ktor.ext.inject
 fun Application.configureSecurity() {
     val userService: UserService by inject()
     val httpClient = HttpClient(CIO) {
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.BODY
+        }
         install(JsonFeature) {
-            serializer = KotlinxSerializer()
+            serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
+                ignoreUnknownKeys = true
+                coerceInputValues = true
+            })
         }
     }
 
@@ -105,11 +113,13 @@ fun Application.configureSecurity() {
 
         jwt("auth-jwt") {
             realm = "/"
-            verifier(JWT
-                .require(Algorithm.HMAC256("secret"))
-                .withAudience("http://0.0.0.0:8080/hello")
-                .withIssuer("http://0.0.0.0:8080/")
-                .build())
+            verifier(
+                JWT
+                    .require(Algorithm.HMAC256("secret"))
+                    .withAudience("http://0.0.0.0:8080/hello")
+                    .withIssuer("http://0.0.0.0:8080/")
+                    .build()
+            )
             validate { credential ->
                 val username = credential.payload.getClaim("username").asString()
                 if (userService.findUser(username) != null) {
@@ -120,17 +130,17 @@ fun Application.configureSecurity() {
             }
         }
 
-        oauth("auth-oauth-google") {
+        oauth("auth-oauth-github") {
             urlProvider = { "http://localhost:8080/callback" }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
-                    name = "google",
-                    authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
-                    accessTokenUrl = "https://accounts.google.com/o/oauth2/token",
+                    name = "github",
+                    authorizeUrl = "https://github.com/login/oauth/authorize",
+                    accessTokenUrl = "https://github.com/login/oauth/access_token",
                     requestMethod = HttpMethod.Post,
-                    clientId = System.getenv("GOOGLE_CLIENT_ID"),
-                    clientSecret = System.getenv("GOOGLE_CLIENT_SECRET"),
-                    defaultScopes = listOf("profile")
+                    clientId = System.getenv("GITHUB_CLIENT_ID"),
+                    clientSecret = System.getenv("GITHUB_CLIENT_SECRET"),
+                    defaultScopes = listOf("user")
                 )
             }
             client = httpClient
@@ -139,19 +149,25 @@ fun Application.configureSecurity() {
         session<UserSession>("auth-session-oauth") {
             validate { session: UserSession ->
                 if (session.name != "null") {
-                    val userInfo: UserInfo = httpClient.get("https://www.googleapis.com/oauth2/v2/userinfo") {
-                        headers {
-                            append(HttpHeaders.Authorization, "Bearer ${session.name}")
+                    val userInfo: UserInfo =
+                        httpClient.get("https://api.github.com/user") {
+                            headers {
+                                append(
+                                    name = HttpHeaders.Authorization,
+                                    value = "token ${session.name}"
+                                )
+                            }
                         }
-                    }
-                    log.info("User ${userInfo.name} logged in by existing session")
+                    log.info("User ${userInfo.login} logged in by existing session")
                     session
                 } else {
                     null
                 }
             }
             challenge {
-                call.respondText(status = HttpStatusCode.Unauthorized) { "You don't have permission to this resource." }
+                call.respondText(status = HttpStatusCode.Unauthorized) {
+                    "You don't have permission to this resource."
+                }
             }
         }
 

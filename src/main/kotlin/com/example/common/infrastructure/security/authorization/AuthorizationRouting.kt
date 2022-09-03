@@ -70,14 +70,20 @@ fun Application.configureAuthorizationRouting() {
             }
         }
 
-        authenticate("auth-oauth-google") {
+        authenticate("auth-oauth-github") {
             get("/login-oauth") {}
-        }
 
-        get("/callback") {
-            val principal = call.principal<OAuthAccessTokenResponse.OAuth2>()
-            call.sessions.set(UserSession(name = principal?.accessToken.toString(), roles = setOf(READ, WRITE)))
-            call.respondRedirect("/hello")
+            get("/callback") {
+                val principal =
+                    call.principal<OAuthAccessTokenResponse.OAuth2>()
+                call.sessions.set(
+                    UserSession(
+                        name = principal?.accessToken.toString(),
+                        roles = setOf(READ, WRITE)
+                    )
+                )
+                call.respondRedirect("/hello")
+            }
         }
 
         authenticate("auth-session-oauth") {
