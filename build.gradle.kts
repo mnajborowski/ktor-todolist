@@ -10,7 +10,7 @@ val hikari_version = "5.0.0"
 
 val exposed_version = "0.36.1"
 val koin_version = "3.1.4"
-val kgraphql_version = "0.17.15"
+val kgraphql_version = "0.17.14"
 
 plugins {
     application
