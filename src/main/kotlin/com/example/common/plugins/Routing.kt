@@ -13,9 +13,24 @@ import org.jetbrains.exposed.dao.exceptions.EntityNotFoundException
 fun Application.configureRouting() {
     install(Locations)
     install(StatusPages) {
-        exception<EntityNotFoundException> { cause -> call.respond(HttpStatusCode.NotFound, cause.localizedMessage) }
-        exception<NoSuchElementException> { cause -> call.respond(HttpStatusCode.NotFound, cause.localizedMessage) }
-        exception<IllegalArgumentException> { cause -> call.respond(HttpStatusCode.BadRequest, cause.localizedMessage) }
+        exception<EntityNotFoundException> { cause ->
+            call.respond(
+                HttpStatusCode.NotFound,
+                cause.localizedMessage
+            )
+        }
+        exception<NoSuchElementException> { cause ->
+            call.respond(
+                HttpStatusCode.NotFound,
+                cause.localizedMessage
+            )
+        }
+        exception<IllegalArgumentException> { cause ->
+            call.respond(
+                HttpStatusCode.BadRequest,
+                cause.localizedMessage
+            )
+        }
     }
 
     configureUserRouting()

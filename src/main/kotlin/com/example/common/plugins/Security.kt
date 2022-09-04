@@ -20,6 +20,7 @@ import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.response.*
+import kotlinx.html.currentTimeMillis
 import org.koin.ktor.ext.inject
 
 fun Application.configureSecurity() {
@@ -30,10 +31,11 @@ fun Application.configureSecurity() {
             level = LogLevel.BODY
         }
         install(JsonFeature) {
-            serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
-                ignoreUnknownKeys = true
-                coerceInputValues = true
-            })
+            serializer =
+                KotlinxSerializer(kotlinx.serialization.json.Json {
+                    ignoreUnknownKeys = true
+                    coerceInputValues = true
+                })
         }
     }
 
@@ -53,7 +55,8 @@ fun Application.configureSecurity() {
 
         basic("auth-basic-hashed") {
             validate { credentials ->
-                val digestFunction = DigestConfiguration.digestFunctionStatic
+                val digestFunction =
+                    DigestConfiguration.digestFunctionStatic
                 val hashedUserTable = UserHashedTableAuth(
                     table = mapOf(
                         "mnajborowski" to digestFunction("test")
@@ -121,7 +124,8 @@ fun Application.configureSecurity() {
                     .build()
             )
             validate { credential ->
-                val username = credential.payload.getClaim("username").asString()
+                val username =
+                    credential.payload.getClaim("username").asString()
                 if (userService.findUser(username) != null) {
                     JWTPrincipal(credential.payload)
                 } else {
@@ -135,11 +139,14 @@ fun Application.configureSecurity() {
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "github",
-                    authorizeUrl = "https://github.com/login/oauth/authorize",
-                    accessTokenUrl = "https://github.com/login/oauth/access_token",
+                    authorizeUrl =
+                    "https://github.com/login/oauth/authorize",
+                    accessTokenUrl =
+                    "https://github.com/login/oauth/access_token",
                     requestMethod = HttpMethod.Post,
                     clientId = System.getenv("GITHUB_CLIENT_ID"),
-                    clientSecret = System.getenv("GITHUB_CLIENT_SECRET"),
+                    clientSecret =
+                    System.getenv("GITHUB_CLIENT_SECRET"),
                     defaultScopes = listOf("user")
                 )
             }
@@ -148,7 +155,9 @@ fun Application.configureSecurity() {
 
         session<UserSession>("auth-session-oauth") {
             validate { session: UserSession ->
-                if (session.name != "null") {
+                if (session.name != "null" &&
+                    currentTimeMillis() < session.expiration
+                ) {
                     val userInfo: UserInfo =
                         httpClient.get("https://api.github.com/user") {
                             headers {
@@ -158,52 +167,82 @@ fun Application.configureSecurity() {
                                 )
                             }
                         }
-                    log.info("User ${userInfo.login} logged in by existing session")
+                    log.info(
+                        "User ${userInfo.login} " +
+                                "logged in by existing session"
+                    )
                     session
                 } else {
                     null
                 }
             }
             challenge {
-                call.respondText(status = HttpStatusCode.Unauthorized) {
-                    "You don't have permission to this resource."
+                call.respondRedirect("/login-oauth")
+            }
+        }
+
+        session<UserSession>("auth-session") {
+            validate { session: UserSession ->
+                if (session.name != "null"
+                    && currentTimeMillis() < session.expiration
+                ) {
+                    log.info(
+                        "User ${session.name} " +
+                                "logged in by existing session"
+                    )
+                    session
+                } else {
+                    null
                 }
+            }
+            challenge {
+                call.respondRedirect("/login")
             }
         }
 
         session<UserSession>("auth-session-read") {
             validate { session: UserSession ->
-                if (session.name == "mnajborowski" || session.name == "michal.najborowski") {
+                if (session.name != "null"
+                    && currentTimeMillis() < session.expiration
+                ) {
                     if (session.roles.contains(READ))
                         log.info("User roles verified: ${session.roles}")
                     else
                         return@validate null
-                    log.info("User ${session.name} logged in by existing session")
+                    log.info(
+                        "User ${session.name} " +
+                                "logged in by existing session"
+                    )
                     session
                 } else {
                     null
                 }
             }
             challenge {
-                call.respondText(status = HttpStatusCode.Unauthorized) { "You don't have permission to this resource." }
+                call.respondRedirect("/login")
             }
         }
 
         session<UserSession>("auth-session-write") {
             validate { session: UserSession ->
-                if (session.name == "mnajborowski") {
+                if (session.name != "null"
+                    && currentTimeMillis() < session.expiration
+                ) {
                     if (session.roles.contains(WRITE))
                         log.info("User roles verified: ${session.roles}")
                     else
                         return@validate null
-                    log.info("User ${session.name} logged in by existing session")
+                    log.info(
+                        "User ${session.name} " +
+                                "logged in by existing session"
+                    )
                     session
                 } else {
                     null
                 }
             }
             challenge {
-                call.respondText(status = HttpStatusCode.Unauthorized) { "You don't have permission to this resource." }
+                call.respondRedirect("/login")
             }
         }
     }

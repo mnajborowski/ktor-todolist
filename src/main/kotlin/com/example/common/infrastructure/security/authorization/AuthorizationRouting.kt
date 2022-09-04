@@ -18,14 +18,23 @@ import kotlinx.html.label
 import kotlinx.html.passwordInput
 import kotlinx.html.postForm
 import kotlinx.html.textInput
+import java.lang.System.currentTimeMillis
 import java.util.*
+import java.util.concurrent.TimeUnit.SECONDS
 
 fun Application.configureAuthorizationRouting() {
     routing {
         authenticate("auth-basic") {
             get("/login") {
-                val userName = call.principal<UserIdPrincipal>()?.name.toString()
-                call.sessions.set(UserSession(name = userName, roles = setOf(READ, WRITE)))
+                val userName =
+                    call.principal<UserIdPrincipal>()?.name.toString()
+                call.sessions.set(
+                    UserSession(
+                        name = userName,
+                        expiration =
+                        currentTimeMillis() + SECONDS.toMillis(10),
+                        roles = setOf(READ, WRITE)
+                    ))
                 call.respondRedirect("/hello")
             }
         }
@@ -51,12 +60,13 @@ fun Application.configureAuthorizationRouting() {
 
         authenticate("auth-form") {
             post("/login-jwt") {
-                val username = call.principal<UserIdPrincipal>()?.name.toString()
+                val username =
+                    call.principal<UserIdPrincipal>()?.name.toString()
                 val token = JWT.create()
                     .withAudience("http://0.0.0.0:8080/hello")
                     .withIssuer("http://0.0.0.0:8080/")
                     .withClaim("username", username)
-                    .withExpiresAt(Date(System.currentTimeMillis() + 60000))
+                    .withExpiresAt(Date(currentTimeMillis() + 60000))
                     .sign(Algorithm.HMAC256("secret"))
                 call.respond(hashMapOf("token" to token))
             }
@@ -64,8 +74,16 @@ fun Application.configureAuthorizationRouting() {
 
         authenticate("auth-form") {
             post("/login") {
-                val username = call.principal<UserIdPrincipal>()?.name.toString()
-                call.sessions.set(UserSession(name = username, roles = setOf(READ, WRITE)))
+                val username =
+                    call.principal<UserIdPrincipal>()?.name.toString()
+                call.sessions.set(
+                    UserSession(
+                        name = username,
+                        expiration =
+                        currentTimeMillis() + SECONDS.toMillis(10),
+                        roles = setOf(READ, WRITE)
+                    )
+                )
                 call.respondRedirect("/hello")
             }
         }
@@ -79,6 +97,8 @@ fun Application.configureAuthorizationRouting() {
                 call.sessions.set(
                     UserSession(
                         name = principal?.accessToken.toString(),
+                        expiration =
+                        currentTimeMillis() + SECONDS.toMillis(10),
                         roles = setOf(READ, WRITE)
                     )
                 )
@@ -86,7 +106,7 @@ fun Application.configureAuthorizationRouting() {
             }
         }
 
-        authenticate("auth-session-oauth") {
+        authenticate("auth-session-read") {
             get("/hello") {
                 call.respondText { "Hello! You've logged in." }
             }

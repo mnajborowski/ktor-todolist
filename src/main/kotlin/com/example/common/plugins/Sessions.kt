@@ -6,6 +6,11 @@ import io.ktor.sessions.*
 
 fun Application.configureSessions() {
     install(Sessions) {
-        cookie<UserSession>("user_session")
+        cookie<UserSession>(
+            name = "user_session",
+            storage = SessionStorageMemory()
+        ) {
+            cookie.maxAgeInSeconds = 10
+        }
     }
 }
