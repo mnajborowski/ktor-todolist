@@ -7,13 +7,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserRequest(
-    val nickname: String,
+    val username: String,
     val email: String,
     val cityId: Int,
     val password: String? = null
 ) {
     fun toCreateUserCommand(): CreateUser = CreateUser(
-        nickname = nickname,
+        nickname = username,
         email = email,
         cityId = cityId,
         password = password!!
@@ -21,7 +21,7 @@ data class UserRequest(
 
     fun toUpdateUserCommand(id: UserId): UpdateUser = UpdateUser(
         id = id,
-        nickname = nickname,
+        nickname = username,
         email = email,
         cityId = cityId
     )
