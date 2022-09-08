@@ -10,7 +10,7 @@ fun Application.configureSessions() {
             name = "user_session",
             storage = SessionStorageMemory()
         ) {
-            cookie.maxAgeInSeconds = 10
+            cookie.maxAgeInSeconds = 60
         }
     }
 }
