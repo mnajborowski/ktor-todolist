@@ -19,6 +19,7 @@ import io.ktor.client.features.json.serializer.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.request.*
 import io.ktor.response.*
 import kotlinx.html.currentTimeMillis
 import org.koin.ktor.ext.inject
@@ -198,6 +199,7 @@ fun Application.configureSecurity() {
             challenge {
                 call.respondRedirect("/login")
             }
+            skipWhen { it.request.httpMethod == HttpMethod.Get }
         }
 
         session<UserSession>("auth-session-read") {
