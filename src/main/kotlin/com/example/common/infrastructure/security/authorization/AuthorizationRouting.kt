@@ -26,11 +26,11 @@ fun Application.configureAuthorizationRouting() {
     routing {
         authenticate("auth-basic") {
             get("/login") {
-                val userName =
+                val username =
                     call.principal<UserIdPrincipal>()?.name.toString()
                 call.sessions.set(
                     UserSession(
-                        name = userName,
+                        name = username,
                         expiration =
                         currentTimeMillis() + SECONDS.toMillis(10),
                         roles = setOf(READ, WRITE)
@@ -59,20 +59,6 @@ fun Application.configureAuthorizationRouting() {
         }
 
         authenticate("auth-form") {
-            post("/login-jwt") {
-                val username =
-                    call.principal<UserIdPrincipal>()?.name.toString()
-                val token = JWT.create()
-                    .withAudience("http://0.0.0.0:8080/hello")
-                    .withIssuer("http://0.0.0.0:8080/")
-                    .withClaim("username", username)
-                    .withExpiresAt(Date(currentTimeMillis() + 60000))
-                    .sign(Algorithm.HMAC256("secret"))
-                call.respond(hashMapOf("token" to token))
-            }
-        }
-
-        authenticate("auth-form") {
             post("/login") {
                 val username =
                     call.principal<UserIdPrincipal>()?.name.toString()
@@ -85,6 +71,24 @@ fun Application.configureAuthorizationRouting() {
                     )
                 )
                 call.respondRedirect("/hello")
+            }
+        }
+
+        authenticate("auth-form") {
+            post("/login-jwt") {
+                val username =
+                    call.principal<UserIdPrincipal>()?.name.toString()
+                val token = JWT.create()
+                    .withAudience("http://0.0.0.0:8080/hello")
+                    .withIssuer("http://0.0.0.0:8080/")
+                    .withClaim("username", username)
+                    .withExpiresAt(
+                        Date(
+                            currentTimeMillis() + SECONDS.toMillis(60)
+                        )
+                    )
+                    .sign(Algorithm.HMAC256("secret"))
+                call.respond(hashMapOf("token" to token))
             }
         }
 
