@@ -2,13 +2,16 @@ package com.example.common.infrastructure.security.authorization
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.example.common.infrastructure.client.HttpClient
 import com.example.common.infrastructure.security.principal.Role.READ
 import com.example.common.infrastructure.security.principal.Role.WRITE
 import com.example.common.infrastructure.security.principal.UserSession
 import com.example.common.plugins.requireRole
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.client.request.*
 import io.ktor.html.*
+import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.sessions.*
@@ -24,6 +27,8 @@ import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 
 fun Application.configureAuthorizationRouting() {
+    val httpClient = HttpClient.default
+
     routing {
         authenticate("auth-basic") {
             get("/login") {
@@ -33,7 +38,7 @@ fun Application.configureAuthorizationRouting() {
                     UserSession(
                         name = username,
                         expiration =
-                        currentTimeMillis() + SECONDS.toMillis(10),
+                        currentTimeMillis() + SECONDS.toMillis(60),
                         roles = setOf(READ)
                     ))
                 call.respondRedirect("/hello")
@@ -67,7 +72,7 @@ fun Application.configureAuthorizationRouting() {
                     UserSession(
                         name = username,
                         expiration =
-                        currentTimeMillis() + SECONDS.toMillis(10),
+                        currentTimeMillis() + SECONDS.toMillis(60),
                         roles = setOf(READ)
                     )
                 )
@@ -99,11 +104,16 @@ fun Application.configureAuthorizationRouting() {
             get("/callback") {
                 val principal =
                     call.principal<OAuthAccessTokenResponse.OAuth2>()
+                val userInfo: UserInfo = httpClient.get("https://api.github.com/user") {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer ${principal?.accessToken}")
+                    }
+                }
                 call.sessions.set(
                     UserSession(
-                        name = principal?.accessToken.toString(),
+                        name = userInfo.login,
                         expiration =
-                        currentTimeMillis() + SECONDS.toMillis(10),
+                        currentTimeMillis() + SECONDS.toMillis(60),
                         roles = setOf(READ, WRITE)
                     )
                 )
