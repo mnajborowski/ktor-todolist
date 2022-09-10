@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.example.common.infrastructure.security.principal.Role.READ
 import com.example.common.infrastructure.security.principal.Role.WRITE
 import com.example.common.infrastructure.security.principal.UserSession
+import com.example.common.plugins.requireRole
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.html.*
@@ -33,7 +34,7 @@ fun Application.configureAuthorizationRouting() {
                         name = username,
                         expiration =
                         currentTimeMillis() + SECONDS.toMillis(10),
-                        roles = setOf(READ, WRITE)
+                        roles = setOf(READ)
                     ))
                 call.respondRedirect("/hello")
             }
@@ -67,7 +68,7 @@ fun Application.configureAuthorizationRouting() {
                         name = username,
                         expiration =
                         currentTimeMillis() + SECONDS.toMillis(10),
-                        roles = setOf(READ, WRITE)
+                        roles = setOf(READ)
                     )
                 )
                 call.respondRedirect("/hello")
@@ -110,9 +111,11 @@ fun Application.configureAuthorizationRouting() {
             }
         }
 
-        authenticate("auth-session-read") {
-            get("/hello") {
-                call.respondText { "Hello! You've logged in." }
+        authenticate("auth-session") {
+            requireRole(READ, WRITE) {
+                get("/hello") {
+                    call.respondText { "Hello! You've logged in." }
+                }
             }
         }
     }

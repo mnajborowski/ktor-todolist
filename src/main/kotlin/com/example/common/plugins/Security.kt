@@ -40,6 +40,8 @@ fun Application.configureSecurity() {
         }
     }
 
+    install(RoleBasedAuthorization)
+
     install(Authentication) {
         basic("auth-basic") {
             validate { credentials ->
