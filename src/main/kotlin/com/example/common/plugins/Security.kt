@@ -81,8 +81,12 @@ fun Application.configureSecurity() {
             userParamName = "username"
             passwordParamName = "password"
             validate { credentials ->
-                if (credentials.name == "mnajborowski"
-                    && credentials.password == "test"
+                val user = userService.getUser(credentials.name)
+                if (
+                    credentials.name == user.username &&
+                    DigestConfiguration
+                        .sha256(credentials.password, user.salt)
+                        .contentEquals(user.passwordHash)
                 ) {
                     UserIdPrincipal(credentials.name)
                 } else {
