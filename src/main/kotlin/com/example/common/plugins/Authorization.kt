@@ -1,18 +1,13 @@
 package com.example.common.plugins
 
-import com.example.common.infrastructure.security.principal.Role
-import com.example.common.infrastructure.security.principal.UserSession
-import com.example.common.infrastructure.security.principal.getConfigurationName
 import io.ktor.application.*
 import io.ktor.auth.*
-import io.ktor.request.*
 import io.ktor.routing.*
-import io.ktor.sessions.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
 import org.slf4j.LoggerFactory
 
-class RoleBasedAuthorization {
+class Authorization {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     class Configuration
@@ -20,6 +15,7 @@ class RoleBasedAuthorization {
     fun interceptPipeline(
         pipeline: ApplicationCallPipeline,
         configurationNames: List<String?> = listOf(null),
+        block: suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit,
     ) {
         require(configurationNames.isNotEmpty()) {
             "At least one configuration name or default listOf(null)"
@@ -34,59 +30,44 @@ class RoleBasedAuthorization {
             AuthorizationPhase
         )
 
-        pipeline.intercept(AuthorizationPhase) {
-            val session = call.sessions.get<UserSession>()
-                ?: throw SecurityException("Session not found")
-            val roles = session.roles
-            if (roles.none {
-                    it.getConfigurationName() in configurationNames
-                }
-            ) {
-                logger.warn(
-                    "Authorization failed for ${call.request.path()}. " +
-                            "User ${session.name} doesn't have any " +
-                            "given roles."
-                )
-                throw SecurityException("Insufficient roles")
-            }
-        }
+        pipeline.intercept(AuthorizationPhase, block)
     }
 
     companion object Feature : ApplicationFeature<
             Application,
             Configuration,
-            RoleBasedAuthorization
+            Authorization
             > {
         val AuthorizationPhase: PipelinePhase =
             PipelinePhase("Authorize")
 
-        override val key: AttributeKey<RoleBasedAuthorization> =
+        override val key: AttributeKey<Authorization> =
             AttributeKey("Authorization")
 
         override fun install(
             pipeline: Application,
             configure: Configuration.() -> Unit
-        ): RoleBasedAuthorization {
-            return RoleBasedAuthorization()
+        ): Authorization {
+            return Authorization()
         }
     }
 }
 
-fun Route.requireRole(
-    vararg roles: Role,
-    build: Route.() -> Unit
+fun Route.authorize(
+    configurationNames: List<String?> = listOf(null),
+    build: Route.() -> Unit,
+    authorizationBlock: suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit,
 ): Route {
-    require(roles.isNotEmpty()) {
-        "At least one role need to be provided"
-    }
-    val configurationNames =
-        roles.distinct().map { it.getConfigurationName() }
     val authorizedRoute = createChild(
         AuthorizationRouteSelector(configurationNames)
     )
 
-    application.feature(RoleBasedAuthorization)
-        .interceptPipeline(authorizedRoute, configurationNames)
+    application.feature(Authorization)
+        .interceptPipeline(
+            authorizedRoute,
+            configurationNames,
+            authorizationBlock
+        )
     authorizedRoute.build()
     return authorizedRoute
 }

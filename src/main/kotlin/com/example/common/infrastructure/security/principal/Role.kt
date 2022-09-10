@@ -5,5 +5,5 @@ enum class Role {
     WRITE
 }
 
-fun Role.getConfigurationName() =
-    "auth-role-${this.toString().lowercase()}"
+fun Collection<Role>.getConfigurationNames() =
+    distinct().map { "auth-role-${it.toString().lowercase()}" }
