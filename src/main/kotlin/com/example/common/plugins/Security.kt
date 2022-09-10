@@ -2,6 +2,7 @@ package com.example.common.plugins
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.example.common.infrastructure.client.HttpClient
 import com.example.common.infrastructure.security.authorization.DigestConfiguration
 import com.example.common.infrastructure.security.authorization.UserInfo
 import com.example.common.infrastructure.security.principal.Role.READ
@@ -12,11 +13,6 @@ import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
 import io.ktor.auth.ldap.*
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
-import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.request.*
@@ -26,21 +22,9 @@ import org.koin.ktor.ext.inject
 
 fun Application.configureSecurity() {
     val userService: UserService by inject()
-    val httpClient = HttpClient(CIO) {
-        install(Logging) {
-            logger = Logger.DEFAULT
-            level = LogLevel.BODY
-        }
-        install(JsonFeature) {
-            serializer =
-                KotlinxSerializer(kotlinx.serialization.json.Json {
-                    ignoreUnknownKeys = true
-                    coerceInputValues = true
-                })
-        }
-    }
+    val httpClient = HttpClient.default
 
-    install(RoleBasedAuthorization)
+    install(Authorization)
 
     install(Authentication) {
         basic("auth-basic") {
