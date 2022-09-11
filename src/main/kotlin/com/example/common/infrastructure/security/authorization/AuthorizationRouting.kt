@@ -6,7 +6,7 @@ import com.example.common.infrastructure.client.HttpClient
 import com.example.common.infrastructure.security.principal.Role.READ
 import com.example.common.infrastructure.security.principal.Role.WRITE
 import com.example.common.infrastructure.security.principal.UserSession
-import com.example.common.plugins.requireRole
+import com.example.common.plugins.authorization.requireRole
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.client.request.*

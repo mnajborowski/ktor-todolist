@@ -1,17 +1,12 @@
-package com.example.common.plugins
+package com.example.common.plugins.authorization
 
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.routing.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
-import org.slf4j.LoggerFactory
 
 class Authorization {
-    private val logger = LoggerFactory.getLogger(javaClass)
-
-    class Configuration
-
     fun interceptPipeline(
         pipeline: ApplicationCallPipeline,
         configurationNames: List<String?> = listOf(null),
@@ -35,7 +30,7 @@ class Authorization {
 
     companion object Feature : ApplicationFeature<
             Application,
-            Configuration,
+            Any,
             Authorization
             > {
         val AuthorizationPhase: PipelinePhase =
@@ -46,7 +41,7 @@ class Authorization {
 
         override fun install(
             pipeline: Application,
-            configure: Configuration.() -> Unit
+            configure: Any.() -> Unit
         ): Authorization {
             return Authorization()
         }
@@ -56,17 +51,16 @@ class Authorization {
 fun Route.authorize(
     configurationNames: List<String?> = listOf(null),
     build: Route.() -> Unit,
-    authorizationBlock: suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit,
+    block: suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit,
 ): Route {
     val authorizedRoute = createChild(
         AuthorizationRouteSelector(configurationNames)
     )
-
     application.feature(Authorization)
         .interceptPipeline(
             authorizedRoute,
             configurationNames,
-            authorizationBlock
+            block
         )
     authorizedRoute.build()
     return authorizedRoute

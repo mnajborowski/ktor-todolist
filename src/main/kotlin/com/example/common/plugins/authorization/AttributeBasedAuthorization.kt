@@ -1,4 +1,4 @@
-package com.example.common.plugins
+package com.example.common.plugins.authorization
 
 import com.example.common.CityId
 import com.example.common.infrastructure.security.principal.UserSession
@@ -19,6 +19,8 @@ fun Route.livesInCity(
             ?: throw AuthenticationException("Session not found")
         val user = service.getUser(session.name)
         if (user.city.id != cityId)
-            throw SecurityException("User ${user.username} doesn't live in ${user.city.name}.")
+            throw SecurityException(
+                "User ${user.username} doesn't live in ${user.city.name}."
+            )
     }
 }

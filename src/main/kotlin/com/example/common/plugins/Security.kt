@@ -8,6 +8,7 @@ import com.example.common.infrastructure.security.authorization.UserInfo
 import com.example.common.infrastructure.security.principal.Role.READ
 import com.example.common.infrastructure.security.principal.Role.WRITE
 import com.example.common.infrastructure.security.principal.UserSession
+import com.example.common.plugins.authorization.Authorization
 import com.example.user.domain.service.UserService
 import io.ktor.application.*
 import io.ktor.auth.*

@@ -1,4 +1,4 @@
-package com.example.common.plugins
+package com.example.common.plugins.authorization
 
 import com.example.common.infrastructure.security.principal.Role
 import com.example.common.infrastructure.security.principal.UserSession
@@ -19,7 +19,9 @@ fun Route.requireRole(
         val session = call.sessions.get<UserSession>()
             ?: throw AuthenticationException("Session not found")
         if (session.roles.none { it in roles }) {
-            throw SecurityException("User ${session.name} doesn't have any of $roles.")
+            throw SecurityException(
+                "User ${session.name} doesn't have any of $roles."
+            )
         }
     }
 }
