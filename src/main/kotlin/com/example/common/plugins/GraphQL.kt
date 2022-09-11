@@ -1,6 +1,9 @@
 package com.example.common.plugins
 
 import com.apurebase.kgraphql.GraphQL
+import com.example.common.infrastructure.security.principal.Role.READ
+import com.example.common.infrastructure.security.principal.Role.WRITE
+import com.example.common.plugins.authorization.requireRole
 import com.example.user.api.dto.request.UserRequest
 import com.example.user.api.dto.response.CityResponse
 import com.example.user.api.dto.response.UserResponse
@@ -19,7 +22,9 @@ fun Application.configureGraphQL() {
             inputType<UserRequest> { description = "User input" }
 
             wrap { route ->
-                authenticate("auth-session", build = route)
+                authenticate("auth-session") {
+                    requireRole(READ, WRITE, build = route)
+                }
             }
 
             query("user") {
