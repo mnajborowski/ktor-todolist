@@ -43,7 +43,7 @@ fun Route.getUserById(service: UserService) {
 }
 
 fun Route.createUser(service: UserService) {
-    authenticate("auth-session-write") {
+    authenticate("auth-session") {
         requireRole(WRITE) {
             post {
                 call.receive<UserRequest>()
