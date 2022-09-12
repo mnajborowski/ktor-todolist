@@ -1,6 +1,9 @@
 package com.example.user.api
 
 import com.example.common.UserId
+import com.example.common.infrastructure.security.principal.Role.READ
+import com.example.common.infrastructure.security.principal.Role.WRITE
+import com.example.common.plugins.authorization.requireRole
 import com.example.user.api.dto.request.UserRequest
 import com.example.user.domain.service.UserService
 import io.ktor.application.*
@@ -28,10 +31,12 @@ fun Application.configureUserRouting() {
 
 @KtorExperimentalLocationsAPI
 fun Route.getUserById(service: UserService) {
-    authenticate("auth-session-read") {
-        get<UserParameters> { userParameters ->
-            service.getUser(userParameters.id).let {
-                call.respond(it.toUserResponse())
+    authenticate("auth-session") {
+        requireRole(READ) {
+            get<UserParameters> { userParameters ->
+                service.getUser(userParameters.id).let {
+                    call.respond(it.toUserResponse())
+                }
             }
         }
     }
@@ -39,33 +44,39 @@ fun Route.getUserById(service: UserService) {
 
 fun Route.createUser(service: UserService) {
     authenticate("auth-session-write") {
-        post {
-            call.receive<UserRequest>()
-                .toCreateUserCommand()
-                .let(service::createUser)
-                .let { call.respond(it.toUserResponse()) }
+        requireRole(WRITE) {
+            post {
+                call.receive<UserRequest>()
+                    .toCreateUserCommand()
+                    .let(service::createUser)
+                    .let { call.respond(it.toUserResponse()) }
+            }
         }
     }
 }
 
 @OptIn(KtorExperimentalLocationsAPI::class)
 fun Route.updateUser(service: UserService) {
-    authenticate("auth-session-write") {
-        put<UserParameters> { userParameters ->
-            call.receive<UserRequest>()
-                .toUpdateUserCommand(userParameters.id)
-                .let(service::updateUser)
-                .let { call.respond(it.toUserResponse()) }
+    authenticate("auth-session") {
+        requireRole(WRITE) {
+            put<UserParameters> { userParameters ->
+                call.receive<UserRequest>()
+                    .toUpdateUserCommand(userParameters.id)
+                    .let(service::updateUser)
+                    .let { call.respond(it.toUserResponse()) }
+            }
         }
     }
 }
 
 @KtorExperimentalLocationsAPI
 fun Route.deleteUser(service: UserService) {
-    authenticate("auth-session-write") {
-        delete<UserParameters> { userParameters ->
-            service.deleteUser(userParameters.id)
-                .let { call.respond(HttpStatusCode.NoContent) }
+    authenticate("auth-session") {
+        requireRole(WRITE) {
+            delete<UserParameters> { userParameters ->
+                service.deleteUser(userParameters.id)
+                    .let { call.respond(HttpStatusCode.NoContent) }
+            }
         }
     }
 }

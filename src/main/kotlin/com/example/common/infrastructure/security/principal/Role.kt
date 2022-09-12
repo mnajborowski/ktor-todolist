@@ -4,3 +4,6 @@ enum class Role {
     READ,
     WRITE
 }
+
+fun Collection<Role>.getConfigurationNames() =
+    distinct().map { "auth-role-${it.toString().lowercase()}" }

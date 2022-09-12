@@ -10,6 +10,7 @@ val hikari_version = "5.0.0"
 
 val exposed_version = "0.36.1"
 val koin_version = "3.1.4"
+val kgraphql_version = "0.17.14"
 
 plugins {
     application
@@ -56,6 +57,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
     implementation("io.insert-koin:koin-ktor:$koin_version")
     implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
+    implementation("com.apurebase:kgraphql:$kgraphql_version")
+    implementation("com.apurebase:kgraphql-ktor:$kgraphql_version")
     testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
     testImplementation("io.insert-koin:koin-test:$koin_version")
     testImplementation("io.kotest:kotest-runner-junit5:$kotest_version")

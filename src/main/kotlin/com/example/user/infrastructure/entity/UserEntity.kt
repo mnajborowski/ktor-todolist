@@ -12,8 +12,8 @@ object Users : IntIdTable("user") {
     val city = reference("cityId", Cities.id)
 
     val username = text("username")
-    val passwordHash = binary("password_hash")
-    val salt = binary("salt")
+    val passwordHash = binary("password_hash").default(byteArrayOf())
+    val salt = binary("salt").default(byteArrayOf())
 }
 
 class UserEntity(

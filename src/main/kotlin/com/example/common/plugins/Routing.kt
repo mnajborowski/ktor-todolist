@@ -31,6 +31,18 @@ fun Application.configureRouting() {
                 cause.localizedMessage
             )
         }
+        exception<SecurityException> { cause ->
+            call.respond(
+                HttpStatusCode.Unauthorized,
+                cause.localizedMessage
+            )
+        }
+        exception<SecurityException> { cause ->
+            call.respond(
+                HttpStatusCode.Forbidden,
+                cause.localizedMessage
+            )
+        }
     }
 
     configureUserRouting()
