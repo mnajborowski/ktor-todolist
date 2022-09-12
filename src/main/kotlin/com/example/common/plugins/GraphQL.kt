@@ -27,6 +27,11 @@ fun Application.configureGraphQL() {
                 }
             }
 
+            query("hello") {
+                description = "Test query"
+                resolver { -> "Hello! You've logged in." }
+            }
+
             query("user") {
                 description = "Returns a user with given username"
                 resolver { username: String ->
