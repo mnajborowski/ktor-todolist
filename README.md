@@ -7,6 +7,7 @@ The goal of the project is to show how to implement every type of authentication
 ## Most important files:
 - common:
   - [Authorization.kt](src/main/kotlin/com/example/common/plugins/authorization/Authorization.kt) - class containing generic authorization mechanism, customised by separate functions like the one in [RoleBasedAuthorization.kt](src/main/kotlin/com/example/common/plugins/authorization/RoleBasedAuthorization.kt) or [AttributeBasedAuthorization.kt](src/main/kotlin/com/example/common/plugins/authorization/AttributeBasedAuthorization.kt), which main purpose is to pass a custom lambda expression with authorization checks
+  - [Security.kt](src/main/kotlin/com/example/common/plugins/Security.kt) - configurations for each type of authentication supported by Ktor
   - [AuthorizationRouting.kt](src/main/kotlin/com/example/common/plugins/authorization/AuthorizationRouting.kt) - REST API routing configuration, containing endpoint handlers for different types of login
   - [GraphQL.kt](src/main/kotlin/com/example/common/plugins/GraphQL.kt) - GraphQL API routing configuration, containing endpoint handlers for getting and creating a user
 - user:
